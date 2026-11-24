@@ -1,4 +1,6 @@
 import atexit
+import base64
+import json
 import os
 import subprocess
 import sys
@@ -6,7 +8,7 @@ import urllib.error
 import urllib.request
 from contextlib import asynccontextmanager
 from pathlib import Path
-import json
+
 
 import uvicorn
 from fastapi import FastAPI, Request, Response
@@ -91,14 +93,21 @@ def version():
     return {"model_version": "unknown", "trained_at": None}
 
 
+def _to_scoring_payload(body, content_type):
+    """Raw image bytes become the JSON the scoring server expects; JSON passes through."""
+    if content_type.startswith("application/json"):
+        return body, content_type
+    image_b64 = base64.b64encode(body).decode()
+    return json.dumps({"instances": [image_b64]}).encode(), "application/json"
+
 @app.post("/invocations")
 @app.post("/infer")
 async def invocations(request: Request):
-    body = await request.body()
+    body, content_type = _to_scoring_payload(await request.body(), request.headers.get("content-type", ""))
     req = urllib.request.Request(
         f"http://{UPSTREAM_HOST}:{UPSTREAM_PORT}/invocations",
         data=body,
-        headers={"Content-Type": request.headers.get("content-type", "application/json")},
+        headers={"Content-Type": content_type},
         method="POST",
     )
     try:
