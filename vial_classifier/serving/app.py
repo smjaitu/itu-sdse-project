@@ -9,7 +9,7 @@ from pathlib import Path
 import json
 
 import uvicorn
-from fastapi import FastAPI, Response
+from fastapi import FastAPI, Request, Response
 
 from vial_classifier.config import EXPORT_DIR, PORT, UPSTREAM_HOST, UPSTREAM_PORT
 
@@ -91,6 +91,37 @@ def version():
     return {"model_version": "unknown", "trained_at": None}
 
 
+@app.post("/invocations")
+@app.post("/infer")
+async def invocations(request: Request):
+    body = await request.body()
+    req = urllib.request.Request(
+        f"http://{UPSTREAM_HOST}:{UPSTREAM_PORT}/invocations",
+        data=body,
+        headers={"Content-Type": request.headers.get("content-type", "application/json")},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=300) as resp:
+            return Response(
+                content=resp.read(),
+                status_code=resp.status,
+                media_type=resp.headers.get("content-type", "application/json"),
+            )
+    except urllib.error.HTTPError as e:
+        return Response(
+            content=e.read(),
+            status_code=e.code,
+            media_type=e.headers.get("content-type", "application/json"),
+        )
+    except (urllib.error.URLError, TimeoutError, OSError) as e:
+        return Response(
+            content=f'{{"status": "error", "detail": "{e}"}}',
+            status_code=502,
+            media_type="application/json",
+        )
+        
+        
 # ---- CLI ----
 def main():
     uvicorn.run(app, host="0.0.0.0", port=PORT)
