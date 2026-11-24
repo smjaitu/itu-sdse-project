@@ -11,9 +11,11 @@ from pathlib import Path
 
 
 import uvicorn
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Query, Request, Response
 
-from vial_classifier.config import EXPORT_DIR, PORT, UPSTREAM_HOST, UPSTREAM_PORT
+from vial_classifier.config import DRIFT_DEFAULT_DAYS, EXPORT_DIR, INFERENCE_LOG_PATH, PORT, UPSTREAM_HOST, UPSTREAM_PORT
+
+from vial_classifier.serving.drift import detect_drift, load_baseline_stats, load_inference_logs
 
 # The exported model to serve. Can be overridden with an environment variable (e.g. in Docker)
 MODEL_PATH = Path(os.environ.get("MODEL_PATH", EXPORT_DIR))
@@ -129,7 +131,13 @@ async def invocations(request: Request):
             status_code=502,
             media_type="application/json",
         )
-        
+
+@app.get("/drift")
+def drift(days: int = Query(default=DRIFT_DEFAULT_DAYS, ge=1)):
+    """Run drift detection over the requests logged by the scoring server."""
+    logs = load_inference_logs(INFERENCE_LOG_PATH)
+    baseline = load_baseline_stats(MODEL_PATH / "drift_detection" / "drift_baseline_stats.json")
+    return detect_drift(logs, days=days, baseline_stats=baseline)        
         
 # ---- CLI ----
 def main():

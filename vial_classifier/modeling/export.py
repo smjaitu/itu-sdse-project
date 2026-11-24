@@ -210,6 +210,18 @@ def export_model(client, version, export_dir=EXPORT_DIR, model_name=MODEL_NAME):
     with open(export_dir / "version.json", "w") as f:
         json.dump(version_info, f, indent=2)
     print("Version info:", version_info)
+    
+
+def export_drift_baseline(client, version, export_dir=EXPORT_DIR, model_name=MODEL_NAME):
+    """Copy the drift baseline of the exported model's training run next to the model,
+    so /drift always compares against the baseline of the model that is being served."""
+    run_id = client.get_model_version(name=model_name, version=str(version)).run_id
+    path = mlflow.artifacts.download_artifacts(
+        run_id=run_id,
+        artifact_path="drift_detection/drift_baseline_stats.json",
+        dst_path=str(export_dir),
+    )
+    print(f"  Drift baseline exported to: {path}")
 
 
 # ---- CLI ----
@@ -229,6 +241,7 @@ def main():
         version = prod_model_version
 
     export_model(client, version)
+    export_drift_baseline(client, version)
 
 
 if __name__ == "__main__":

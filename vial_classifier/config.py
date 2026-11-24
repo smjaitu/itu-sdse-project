@@ -31,7 +31,7 @@ MODEL_RESULTS_PATH = ARTIFACT_DIR / "model_results.json"
 DRIFT_BASELINE_STATS_PATH = ARTIFACT_DIR / "drift_baseline_stats.json"
 CLASS_NAMES_PATH = ARTIFACT_DIR / "class_names.json"
 IMAGE_STATISTICS_PATH = ARTIFACT_DIR / "image_statistics.json"
-INFERENCE_LOG_PATH = ARTIFACT_DIR / "inference_log.json"
+INFERENCE_LOG_PATH = Path("artifacts") / "inference_log.json"
 
 # Object store (public Hetzner bucket)
 S3_ENDPOINT = "https://itudsip.hel1.your-objectstorage.com"
@@ -70,3 +70,7 @@ EXPORT_DIR = MODELS_DIR / "model"
 PORT = 5001
 UPSTREAM_PORT = 5002
 UPSTREAM_HOST = "127.0.0.1"
+
+# Drift detection
+DRIFT_DEFAULT_DAYS = 7
+DRIFT_KS_PVALUE_THRESHOLD = 0.05

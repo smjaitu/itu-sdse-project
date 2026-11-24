@@ -10,18 +10,15 @@ import torch
 import torchvision.transforms as transforms
 from PIL import Image
 
-from vial_classifier.config import IMAGE_SIZE, THRESHOLD, TRANSFORM_MEAN, TRANSFORM_STD
+from vial_classifier.config import IMAGE_SIZE, THRESHOLD, TRANSFORM_MEAN, TRANSFORM_STD, INFERENCE_LOG_PATH
 from vial_classifier.modeling.model import SimpleCNN
-
-# Relative on purpose: resolved against the working directory of whoever loads the model
-DEFAULT_INFERENCE_LOG_PATH = "artifacts/inference_log.json"
 
 
 class SimpleLoggingWrapper(mlflow.pyfunc.PythonModel):
     """Wrapper that logs inference requests and returns predictions."""
 
     def __init__(
-        self, model=None, model_path=None, log_path=DEFAULT_INFERENCE_LOG_PATH, threshold=THRESHOLD
+        self, model=None, model_path=None, log_path=INFERENCE_LOG_PATH, threshold=THRESHOLD
     ):
         self.model = model
         self.model_path = model_path
