@@ -31,7 +31,7 @@ MODEL_RESULTS_PATH = ARTIFACT_DIR / "model_results.json"
 DRIFT_BASELINE_STATS_PATH = ARTIFACT_DIR / "drift_baseline_stats.json"
 CLASS_NAMES_PATH = ARTIFACT_DIR / "class_names.json"
 IMAGE_STATISTICS_PATH = ARTIFACT_DIR / "image_statistics.json"
-INFERENCE_LOG_PATH = ARTIFACT_DIR / "inference_log.json"
+INFERENCE_LOG_PATH = Path("artifacts") / "inference_log.json"
 
 # Object store (public Hetzner bucket)
 S3_ENDPOINT = "https://itudsip.hel1.your-objectstorage.com"
