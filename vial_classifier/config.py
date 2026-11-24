@@ -66,3 +66,7 @@ MLFLOW_ARTIFACT_LOCATION = str(MLFLOW_STATE_DIR / "artifacts")
 # Model registry and export (from the deployment notebook)
 MODEL_ARTIFACT_PATH = "model_pyfunc"
 EXPORT_DIR = MODELS_DIR / "model"
+
+PORT = 5001
+UPSTREAM_PORT = 5002
+UPSTREAM_HOST = "127.0.0.1"
