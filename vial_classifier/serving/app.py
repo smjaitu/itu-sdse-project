@@ -6,6 +6,7 @@ import urllib.error
 import urllib.request
 from contextlib import asynccontextmanager
 from pathlib import Path
+import json
 
 import uvicorn
 from fastapi import FastAPI, Response
@@ -78,6 +79,16 @@ def health():
     return Response(
         content='{"status": "loading"}', status_code=503, media_type="application/json"
     )
+
+
+@app.get("/version")
+def version():
+    """Model version of the served model (watched by the monitoring platform)."""
+    version_file = Path(MODEL_PATH) / "version.json"
+    if version_file.exists():
+        with open(version_file) as f:
+            return json.load(f)
+    return {"model_version": "unknown", "trained_at": None}
 
 
 # ---- CLI ----
